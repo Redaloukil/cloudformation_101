@@ -3,9 +3,8 @@ Description: >
   This template deploys a VPC, with a pair of private subnets spread across two Availabilty Zones.
 
 Parameters:
-  # whatever you consider a changing value, put it as a parameter instead of hard-coding it into your script
   EnvironmentName:
-    Description: An environment name that will be prefixed to resource names
+    Description: Environment name that will be prefixed to resource names
     Type: String
     Default: UdacityProject
   
@@ -15,7 +14,7 @@ Parameters:
     Default: Reda Loukil
     
   VpcCIDR:
-    Description: This virtual private network of the application
+    Description: This virtual private network CIDR
     Type: String
     Default: 10.0.0.0/16
 

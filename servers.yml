@@ -40,8 +40,8 @@ Resources:
         Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
       SecurityGroupIngress:
         - IpProtocol: tcp
-          FromPort: 8080
-          ToPort: 8080
+          FromPort: 80
+          ToPort: 80
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
           FromPort: 22
@@ -142,3 +142,28 @@ Resources:
             Values: [/]
         ListenerArn: !Ref Listener
         Priority: 1 
+
+  BastionHost:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0b33356b362c56df5
+      InstanceType: t2.micro
+      BlockDeviceMappings:
+          - DeviceName: "/dev/sdk"
+            Ebs:
+              VolumeSize: '10'
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          SubnetId:
+            Fn::ImportValue:
+              !Sub ${EnvironmentName}-Public2
+          GroupSet:
+           - !Ref WebServerSecGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Bastion Host
+        - Key: EnvironmentName
+          Value: !Ref EnvironmentName
+        - Key: EnvironmentMaintainer
+          Value: !Ref EnvironmentMaintainer
