@@ -62,10 +62,9 @@ Resources:
           apt-get update -y
           apt-get install unzip awscli -y
           apt-get install apache2 -y
-          systemctl start apache2.service
           cd /var/www/html
-          aws s3 cp s3://udacity-project-two-web-app/udacity.zip .
-          unzip -o udacity.zip
+          echo "<h1>it works! Udagram, Udacity</h1>" > index.html
+          systemctl start apache2.service
       ImageId: ami-0b33356b362c56df5 # this AMI ID may not be available. Find a new base line Ubuntu image.
       SecurityGroups:
         - Ref: WebServerSecGroup
@@ -118,7 +117,8 @@ Resources:
           Value: !Ref EnvironmentName
         - Key: StudentName
           Value: !Ref EnvironmentMaintainer
-
+  
+  #Listener attached to load balancer
   Listener:
       Type: "AWS::ElasticLoadBalancingV2::Listener"
       Properties:
@@ -131,7 +131,8 @@ Resources:
         Port: '80' 
         Protocol: HTTP 
   
-  ALBListenerRule:
+  #Listner Rule of load balancer
+  LBListenerRule:
       Type: "AWS::ElasticLoadBalancingV2::ListenerRule"
       Properties:
         Actions: 
@@ -143,7 +144,34 @@ Resources:
         ListenerArn: !Ref Listener
         Priority: 1 
 
-  BastionHost:
+  #Bastion host instance in public subnet 1
+  BastionHost1:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0b33356b362c56df5
+      InstanceType: t2.micro
+      BlockDeviceMappings:
+          - DeviceName: "/dev/sdk"
+            Ebs:
+              VolumeSize: '10'
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          SubnetId:
+            Fn::ImportValue:
+              !Sub ${EnvironmentName}-Public1
+          GroupSet:
+           - !Ref WebServerSecGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName} Bastion Host 1
+        - Key: EnvironmentName
+          Value: !Ref EnvironmentName
+        - Key: EnvironmentMaintainer
+          Value: !Ref EnvironmentMaintainer
+
+#Bastion host instance in public subnet 2
+  BastionHost2:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: ami-0b33356b362c56df5
@@ -162,7 +190,7 @@ Resources:
            - !Ref WebServerSecGroup
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName} Bastion Host
+          Value: !Sub ${EnvironmentName} Bastion Host 2
         - Key: EnvironmentName
           Value: !Ref EnvironmentName
         - Key: EnvironmentMaintainer
